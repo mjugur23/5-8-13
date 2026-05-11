@@ -12,7 +12,7 @@ from tvDatafeed import TvDatafeed, Interval
 #   TELEGRAM_TOKEN  → Bot token
 #   TELEGRAM_CHAT_ID → Chat ID
 # ─────────────────────────────────────────────────────────────
-TOKEN   = os.environ.get("TELEGRAM_TOKEN", "")
+TOKEN   = os.environ.get("8729990107:AAHyGbQjcbORktI_h046N0QVUg_d17iTy6g", "")
 CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 def send_telegram(message: str):
