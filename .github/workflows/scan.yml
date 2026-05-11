@@ -1,0 +1,31 @@
+name: 5-8-13 EMA Taraması
+
+on:
+  schedule:
+    # Her gün saat 18:15 TSİ (15:15 UTC) — borsa kapanışından sonra
+    - cron: '15 15 * * 1-5'   # Pazartesi-Cuma
+
+  # Manuel çalıştırma için
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repoyu çek
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Gereksinimleri kur
+        run: pip install -r requirements.txt
+
+      - name: Taramayı çalıştır
+        env:
+          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python scanner.py
