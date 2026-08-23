@@ -1,36 +1,42 @@
-name: 5-8-13 EMA Taraması
+name: 5-8-13 EMA Patlama Radarı
 
 on:
-  workflow_dispatch:   # cron-job.org bu eventi tetikler
+  schedule:
+    # Hafta içi (Pzt-Cuma) her gün Türkiye saati ile 18:30'da çalışır (UTC 15:30)
+    - cron: '30 15 * * 1-5'
+  workflow_dispatch: # İstediğin zaman GitHub üzerinden manuel tıklayıp başlatmanı sağlar
 
 jobs:
-  scan:
+  tarama-yap:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Repoyu çek
-        uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: 📥 Repoyu Klonla (Checkout)
+      uses: actions/checkout@v4
 
-      - name: Python kur
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
+    - name: 🐍 Python Kurulumu
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
 
-      - name: Gereksinimleri kur
-        run: pip install -r requirements.txt
+    - name: 📦 Kütüphaneleri Yükle
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Taramayı çalıştır
-        env:
-          TELEGRAM_TOKEN:   ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: python scanner.py
+    # ÖNEMLİ: Eğer verileri indiren ayrı bir kodun varsa (örn: download.py) 
+    # scanner.py'den ÖNCE onu çalıştırmalısın. Yorum satırını kaldırıp dosya adını yazabilirsin.
+    # - name: 📊 Güncel Verileri İndir
+    #   run: python verileri_indir.py
 
-      - name: Hafızayı kaydet
-        run: |
-          git config --global user.name  "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add hafiza.json
-          git diff --cached --quiet || git commit -m "hafiza guncellendi $(date +'%Y-%m-%d %H:%M')"
-          git push
+    - name: 🚀 Taramayı Başlat (Motor)
+      run: python scanner.py
+
+    - name: 💾 Sonuçları (JSON) Kaydet ve Pushla
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+        git add bot_data/
+        # Eğer o gün yeni bir sinyal yoksa ve JSON değişmediyse hata vermemesi için || true ekliyoruz
+        git commit -m "🤖 Bot verisi güncellendi (5-8-13 EMA)" || true
+        git push
